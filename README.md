@@ -1,2 +1,2 @@
-# PetriDish.pw-modes
+# PetriDish.pw-mods
 Модификация PetriDish.pw
