@@ -974,7 +974,8 @@ dop = dop+20;
 
 if (chatBoard[len - 1].message != '***playerenter***') {
 
-chattt = makeItCultural(chattt);
+//chattt = makeItCultural(chattt);
+chattt = mZeEngine.addSmiles(chattt);
 
 dop = 0;
 stringlang = chattt.substr(-3,3);
@@ -998,9 +999,8 @@ state = '';
 	}
 
 
-      var selectedRegion = socketaddr.substr(5,socketaddr.length);
-
-        var mg = "<div " + state + " class='" + stringlang.substr(1,2) +  "' " + mod + ">" + verif + "<strong onclick='mZeEngine.to(\""  + escnick + "\");' title='" + chatid + "' style='color:" + chatBoard[len - 1].color + "'>" + escnick + ":</strong> " + chattt.substr(0,chattt.length-4) + "</div>";
+  var selectedRegion = socketaddr.substr(5,socketaddr.length);
+  var mg = "<div " + state + " class='" + stringlang.substr(1,2) +  "' " + mod + ">" + verif + "<strong onclick='mZeEngine.to(\""  + escnick + "\");' title='" + chatid + "' style='color:" + chatBoard[len - 1].color + "'>" + escnick + ":</strong> " + mZeEngine.addSmiles(chattt.substr(0,chattt.length-4)) + "</div>";
 
 }
 
@@ -3293,10 +3293,44 @@ window.jQuery( window ).ready(function( $ ) {
           "$('#chat_textbox').val(nick + ', ');" + 
           "$('body').trigger($.Event('keydown', { keyCode: 13}));" + 
           "$('body').trigger($.Event('keyup', { keyCode: 13}));" + 
+        "}," +
+        "addSmiles: function(textNode){" +
+          "textNode = textNode.replace(/(\\\:smile\\\:|\\\:\\\))/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/smile.gif\" />');" +
+          "textNode = textNode.replace(/(\\\:baby\\\:|\\\:\\\-\\\*)/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/baby.gif\" />');" +
+          "textNode = textNode.replace(/(\\\:ok\\\:|\\\*OK\\\*)/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/ok.gif\" />');" +
+          "textNode = textNode.replace(/(\\\:hi\\\:|\\\*HI\\\*)/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/hi.gif\" />');" +
+          "textNode = textNode.replace(/(\\\:no\\\:|\\\*NO\\\*)/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/no.gif\" />');" +
+          "textNode = textNode.replace(/(\\\:bye\\\:|\\\*BYE\\\*)/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/bye.gif\" />');" +
+          "textNode = textNode.replace(/(\\\:nono\\\:|\\\*NONO\\\*)/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/nono.gif\" />');" +
+          "textNode = textNode.replace(/(\\\:super\\\:|\\\*THUMBS UP\\\*)/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/super.gif\" />');" +
+          "textNode = textNode.replace(/(\\\:dont\\\:|\\\*STOP\\\*)/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/dont.gif\" />');" +
+          "textNode = textNode.replace(/(\\\:beer\\\:|\\\*DRINK\\\*)/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/beer.gif\" />');" +
+          "textNode = textNode.replace(/(\\\:yes\\\:|\\\*YES\\\*)/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/yes.gif\" />');" +
+          "textNode = textNode.replace(/(\\\:smoke\\\:|\\\*WASSUP\\\*)/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/smoke.gif\" />');" +
+          "textNode = textNode.replace(/(\\\:love\\\:|\\\*IN LOVE\\\*)/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/love.gif\" />');" +
+          "textNode = textNode.replace(/(\\\:jeer\\\:|\\\*ROFL\\\*)/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/jeer.gif\" />');" +
+          "textNode = textNode.replace(/(\\\:kiss\\\:|\\\*KISSING\\\*)/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/kiss.gif\" />');" +
+          "textNode = textNode.replace(/(\\\:idea\\\:|\\\*YAHOO\\\*)/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/idea.gif\" />');" +
+          "textNode = textNode.replace(/(\\\:help\\\:|\\\*HELP\\\*)/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/help.gif\" />');" +
+          "textNode = textNode.replace(/(\\\:red\\\:|\\\:\\\-\\\[)/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/red.gif\" />');" +
+//          "textNode = textNode.replace(/(\\\:rose\\\:|\\\@\\\}\\\-\\\>\\\-)/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/rose.gif\" />');" +
+          "textNode = textNode.replace(/(\\\:rose\\\:)/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/rose.gif\" />');" +
+          "textNode = textNode.replace(/(\\\:grust\\\:|\\\:\\\()/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/grust.gif\" />');" +
+          "textNode = textNode.replace(/(\\\:tongue\\\:|\\\:\\\-p)/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/tongue.gif\" />');" +
+          "textNode = textNode.replace(/(\\\:eek\\\:|\\\=\\\-O)/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/eek.gif\" />');" +
+          "textNode = textNode.replace(/(\\\:fire\\\:|\\\]\\\:\\\-\\\>)/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/fire.gif\" />');" +
+          "textNode = textNode.replace(/(\\\:crying\\\:|\\\:\\\'\\\()/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/crying.gif\" />');" +
+          "textNode = textNode.replace(/(\\\:wink\\\:|\\\:\\\;\\\))/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/wink.gif\" />');" +
+          "textNode = textNode.replace(/(\\\:tongue2\\\:|\\\:\\\-P)/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/tongue2.gif\" />');" +
+          "textNode = textNode.replace(/(\\\:grenade\\\:|\\\@\\\=)/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/grenade.gif\" />');" +
+          "textNode = textNode.replace(/(\\\:angel\\\:|O\\\:\\\-\\\))/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/angel.gif\" />');" +
+          "textNode = textNode.replace(/(\\\:laugh\\\:|\\\:\\\-D|xD)/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/laugh.gif\" />');" +
+          "return textNode;" +
         "}" +
       "};"+
     "</script>"
   );
+
   $("#setdark")
     .before('<input type="checkbox" id="setnames" onchange="createCookie(\'setratings\',!$(\'#setratings\').is(\':checked\'),999);setRatings(!$(this).is(\':checked\'));"><label> Без рейтингов</label><br/>');
 
