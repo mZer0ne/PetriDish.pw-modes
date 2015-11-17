@@ -975,7 +975,6 @@ dop = dop+20;
 if (chatBoard[len - 1].message != '***playerenter***') {
 
 //chattt = makeItCultural(chattt);
-chattt = mZeEngine.addSmiles(chattt);
 
 dop = 0;
 stringlang = chattt.substr(-3,3);
@@ -1155,10 +1154,6 @@ if (dif < 530) {
                 blob.oSize = blob.size;
                 blob.color = color;
 		if (playerGroup[0]) {
-			if (blob.id == playerGroup[0].id) {
-				//if (window.selmode == "ARENA") { blob.color = "#eb4b00"; }
-				//if (window.selmode == "FATBOY-ARENA") { blob.color = "#eb4b00"; }
-			}
 
 
 			for (var i = 0, leng = playerGroup.length; i < leng; i++) {
@@ -1199,24 +1194,6 @@ if (dif < 530) {
             if (name) {
                 blob.setName(name);
 
-	//	if (playerGroup[0]) {
-		//	if (blob.id == playerGroup[0].id) {
-		//		var numa = document.getElementById('nick').value;
-		//		if (window.selmode == "ARENA") { blob.setName(numa); }
-		//		if (window.selmode == "FATBOY-ARENA") { blob.setName(numa); }
-		//	}
-
-		//	for (var i = 0, leng = playerGroup.length; i < leng; i++) {
-    			//	if (i in playerGroup) {
-      			//		if (blob.id == playerGroup[i].id) {
-				//		if (window.selmode == "ARENA") { blob.setName(numa); }
-				//		if (window.selmode == "FATBOY-ARENA") { blob.setName(numa); }
-				//	}
-    			//	}
-		//	}
-
-
-	//	}
 
             }
 	    var uuy = window.selmode;
@@ -1755,13 +1732,13 @@ if (supernames.indexOf(escnik.toLowerCase()) != -1) { verif = '<span class="veri
                   if (users[0]) {
                     if ((users[0].name != "Waiting for") && (!isSpectating) && (playerGroup.length == 0)) { 
                       setSpectate(false);
-                                  sendPacket(1);
+                      sendPacket(1);
                       setSpectate(true);
                       jQuery("#playBtn").css("float","left").css("width","255px");
                       jQuery("#spectateBtn").show();
                       jQuery("#specbutton").show();
                       setNick(document.getElementById('nick').value + ":::::" + document.getElementById('password').value + ":::::" + document.getElementById('color').value); 
-                                  sendPacket(1);
+                      sendPacket(1);
                     }
                   }
                 }
