@@ -1941,7 +1941,7 @@ if (supernames.indexOf(escnik.toLowerCase()) != -1) { verif = '<span class="veri
             logoimage = bordersImagesCached[selectedRegion];
         } else {
             bordersImagesCached[selectedRegion] = logoimage = new Image;
-            logoimage.src = bordersImages[selectedRegion] || "/engine/img/petriserverlogo.png";
+            logoimage.src = bordersImages[selectedRegion] || "https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/PetriModsLogo.png";
         }
 
 
@@ -2640,7 +2640,7 @@ if (supernames.indexOf(escnik.toLowerCase()) != -1) { verif = '<span class="veri
                                     /** @type {Image} */
                                     images[name] = new Image;
                                     /** @type {string} */
-                                    images[name].src = "/engine/skins2/skins/" + name + ".png";
+                                    images[name].src = "https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/skins/" + name + ".png";
                                 }
                                 if (0 != images[name].width && images[name].complete) {
                                     nameImg = images[name];
@@ -3248,7 +3248,7 @@ if (supernames.indexOf(escnik.toLowerCase()) != -1) { verif = '<span class="veri
                 var name = $("#nicks").children("option").filter(":selected").text();
                 $("#nick").val(name);
                 if (-1 != skins.indexOf(name)) {
-                    $("#preview").attr("src", "skins/" + name + ".png");
+                    $("#preview").attr("src", "https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/skins/default/" + name + ".png");
                 }
             };
             /** @type {function (): undefined} */
