@@ -20,13 +20,18 @@ var chathistory = 100;
 var spectclick = false;
 var helpte = $("#chat_textbox").attr("placeholder");
 
+// Старые переменные
+var clansSkinMap={};
+var oneSkinMap={};
+
 
 // Доп переменые нашего чата
 var viewChat = {'ru':true,'en':true,'fr':true,'chatenter':false};
 var viewMods = ['ru','en','fr','chatenter'];
 var chatMods = ['','all','team','clan'];
 var chatMode = 'all';
-var team = [];
+var teamList = [];
+var tempVals = {};
 
 // Основное ядро
 (function(win, $) {
@@ -515,7 +520,10 @@ var team = [];
     /** @type {Array} */
     ids = [];
     /** @type {Array} */
+    teamList = [];
+    /** @type {Array} */
     playerGroup = [];
+    /** @type {Array} */
     blobs = {};
     /** @type {Array} */
     list = [];
@@ -827,6 +835,7 @@ var team = [];
     var escnick = htmlspecialchars(chatnicknoid);
     
     // Общий чат
+    var chColor = '';
     var chType = 'all';
     
     // Клан чат
@@ -836,14 +845,16 @@ var team = [];
         var getClan = superclans[i].length;
         if (usernickname.substr(0,getClan) == superclans[i]) {
           if (escnick.toLowerCase().substr(0,getClan) == superclans[i]) {
-//            console.log(escnick.toLowerCase().substr(0,getClan) + ' >> ' + usernickname.substr(0,getClan))
+            chColor = 'color:#00FF00';
             chType = 'clan';
           }
         }
       }
     }
+    
     // Группавой чат
-    if( 1 == 2 ) {
+    if( teamList.indexOf(chatid + ';' + escnick) != -1 ) {
+      chColor = 'color:#0000FF';
       chType = 'team';
     }
     
@@ -857,7 +868,7 @@ var team = [];
     }
     var chatenter = readCookie("chatenter");
     if (chatenter == null || chatenter == 'false') {
-      state = ' style="display:none;" ';
+      state = 'display:none;';
       viewChat['chatenter'] = false;
     }
     if (chatenter == 'true') {
@@ -868,14 +879,15 @@ var team = [];
     
     if (chatBoard[len - 1].message == '***playerenter***') {
       if(chatMode != chType){
-        state = ' style="display:none;"';
+        state = 'display:none;';
       }
       dop = dop+20;
       if (gamelang == 'ru') { chattt = ' вошёл в игру. '; }
       if (gamelang == 'fr') { chattt = ' entre dans le chat. '; }
       if (gamelang == 'en') { chattt = ' enters the game. '; }
       
-      var mg = "<div class='chatenter " + chType + "'" + state + ">" + verif + "<small><strong onclick='mZeEngine.to(\""  + escnick + "\");' title='" + chatid + "'  style='color:" + chatBoard[len - 1].color + "'>" + escnick + ":</strong> " + chattt + "</small></div>";
+      
+      var mg = "<div class='chatenter " + chType + "'style='" + state + chColor + "'>" + verif + "<small><strong onclick='mZeEngine.chTo(\""  + escnick + "\");' oncontextmenu='mZeEngine.chMenu(\""  + escnick + "\"," + chatid + ",event);return false;'  title='" + chatid + "'  style='color:" + chatBoard[len - 1].color + "'>" + escnick + ":</strong> " + chattt + "</small></div>";
     }
     if (chatBoard[len - 1].message != '***playerenter***') {
       chattt = makeItCultural(chattt);
@@ -885,31 +897,32 @@ var team = [];
       var checkchat = readCookie("ruschat");
       viewChat['ru'] = true;
       if ((checkchat == 'false') && (stringlang.substr(1,2) == 'ru')) {
-        state = ' style="display:none;"';
+        state = 'display:none;';
         viewChat['ru'] = false;
       }
       var checkchat1 = readCookie("engchat");
       viewChat['en'] = true;
       if ((checkchat1 == 'false') && (stringlang.substr(1,2) == 'en')) {
-        state = ' style="display:none;"';
+        state = 'display:none;';
         viewChat['en'] = false;
       }
       var checkchat2 = readCookie("frchat");
       viewChat['fr'] = true;
       if ((checkchat2 == 'false') && (stringlang.substr(1,2) == 'fr')) {
-        state = ' style="display:none;" ';
+        state = 'display:none;';
         viewChat['fr'] = false;
       }
       if (supermods.indexOf(chatnicknoid.toLowerCase()) != -1) {
-        mod = "style='color:white;background-color:red;padding:0px 5px;'";
+        mod = "color:white;background-color:red;padding:0px 5px;";
+        chColor = '';
       }
       if(chatMode != chType){
         if(chatMode != 'all'){
-          state = ' style="display:none;"';
+          state = 'display:none;';
         }
       }
       var selectedRegion = socketaddr.substr(5,socketaddr.length);
-      var mg = "<div class='" + stringlang.substr(1,2) +  " " + chType + "'" + state + " " + mod + ">" + verif + "<strong onclick='mZeEngine.to(\""  + escnick + "\");' title='" + chatid + "' style='color:" + chatBoard[len - 1].color + "'>" + escnick + ":</strong> " + mZeEngine.addSmiles(chattt.substr(0,chattt.length-4)) + "</div>";
+      var mg = "<div class='" + stringlang.substr(1,2) +  " " + chType + "' style='" + state + mod + chColor + "'>" + verif + "<strong onclick='mZeEngine.chTo(\""  + escnick + "\");' oncontextmenu='mZeEngine.chMenu(\""  + escnick + "\"," + chatid + ",event);return false;' title='" + chatid + "' style='color:" + chatBoard[len - 1].color + "'>" + escnick + ":</strong> " + mZeEngine.addSmiles(chattt.substr(0,chattt.length-4)) + "</div>";
     }
     $("#chatlog").append(mg);
     if (jQuery('#chatlog div').length > chathistory) {
@@ -2398,9 +2411,6 @@ var team = [];
           }
         }
       };
-
-      var clansSkinMap={};
-      var oneSkinMap={};
       
       var skins2 = (function () {
         var skins2 = {};
@@ -2930,6 +2940,14 @@ window.jQuery( window ).ready(function( $ ) {
   // Наше говно)
   $('#chatlog').remove();
   $('body').append(
+    '<div id="contextMenu">' +
+      '<ul>' +
+        '<li onclick="mZeEngine.menuGroup();" id="addgroup">Добавить в группу</li>' +
+        '<li onclick="mZeEngine.menuGroup();" id="ungroup">Разорвать группу</li>' +
+        '<li onclick="mZeEngine.menuSend();">Сообщение</li>' +
+        '<li onclick="mZeEngine.menuHide();">Закрыть</li>' +
+      '</ul>' +
+    '</div>' +
     '<div id="chatdiv">' + 
       '<div id="chatlog"></div>' +
       '<div class="chatmenu">' +
@@ -2956,14 +2974,49 @@ window.jQuery( window ).ready(function( $ ) {
       "#chat_textbox{border-radius: 0px 0px 10px 10px;width:375px;left:10px;}" +
       ".blackchat, .whitechat{border-radius: 10px 10px 0px 0px;}" +
       "#chatlog div strong{cursor: pointer;}" +
+      
+      // Context Menu
+      "#contextMenu{background-color: #FFFFFF;border: 1px solid #bababa;position: absolute;z-index: 999;display:none;}" +
+      "#contextMenu ul{list-style-type:none;padding:0px;font-famaly:initial;font-size:12px;margin:0px;}" +
+      "#contextMenu ul li{cursor:pointer;padding:7px 36px;background-color:#FFFFFF;color:#000000;}" +
+      "#contextMenu ul li:hover{background-color:#4281f4;color:#000000;}" +
     "</style>" + 
     "<script>" + 
       "var mZeEngine = {" +
-        // 
-        "to: function( nick ){" + 
+        "chTo: function( nick ){" + 
           "$('#chat_textbox').val(nick + ', ' + $('#chat_textbox').val());" + 
           "$('body').trigger($.Event('keydown', { keyCode: 13}));" + 
           "$('body').trigger($.Event('keyup', { keyCode: 13}));" + 
+        "}," +
+        "chMenu: function( nick, id, event ){" + 
+          "tempVals['chMenu'] = id + ';' + nick;" +
+          "var contextPos = getPosition(event);" +
+          "$('#addgroup').hide();" +
+          "$('#ungroup').show();" +
+          "if(teamList.indexOf(tempVals['chMenu']) == -1) {" +
+            "$('#addgroup').show();" +
+            "$('#ungroup').hide();" +
+          "}" +
+          "$('#contextMenu').css({" +
+            "'top': contextPos.y + 'px'," +
+            "'left': contextPos.x + 'px'" +
+          "}).show();" +
+        "}," +
+        "menuGroup: function(){" + 
+          "if(teamList.indexOf(tempVals['chMenu']) != -1) {" +
+            "delete teamList[teamList.indexOf(tempVals['chMenu'])];" +
+          "}else{" +
+            "teamList.push(tempVals['chMenu']);" +
+          "}" +
+          "this.menuHide();" +
+        "}," +
+        "menuSend: function(){" + 
+          "this.chTo(tempVals['chMenu'].split(';')[1]);" +
+          "this.menuHide();" +
+        "}," +
+        "menuHide: function(){" + 
+          "delete tempVals['chMenu'];" +
+          "$('#contextMenu').hide();" +
         "}," +
         "addSmiles: function(textNode){" +
           "textNode = textNode.replace(/(\\\:smile\\\:|\\\:\\\))/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/smile.gif\" />');" +
@@ -3028,6 +3081,19 @@ window.jQuery( window ).ready(function( $ ) {
         "$('#chatdiv').css('top', ($(window).height() - 320) + 'px');" +
       "});" +
       "$('#chatdiv').css('top', ($(window).height() - 320) + 'px');" +
+      "function getPosition(e) {" +
+        "var posx = 0;" +
+        "var posy = 0;" +
+        "if (!e) var e = window.event;" +
+        "if (e.pageX || e.pageY) {" +
+          "posx = e.pageX;" +
+          "posy = e.pageY;" +
+        "}else if (e.clientX || e.clientY) {" +
+          "posx = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;" +
+          "posy = e.clientY + document.body.scrollTop + document.documentElement.scrollTop;" +
+        "}" +
+        "return {x: posx, y: posy};" +
+      "}" +
     "</script>"
   );
   
@@ -3207,3 +3273,190 @@ window.jQuery( window ).ready(function( $ ) {
 	}
 
 });
+
+/*
+
+
+! function() {
+ function i(i, t) {
+  var n = u("<div>").attr("id", "mini-map-token-" + i).css({
+   position: "absolute",
+   width: "5%",
+   height: "5%",
+   background: t,
+   top: "0%",
+   left: "0%"
+  });
+  return n
+ }
+
+ function t(i, t) {
+  void 0 === window.mini_map_tokens[i] && (window.mini_map.append(t), window.mini_map_tokens[i] = t)
+ }
+
+ function n(i) {
+  void 0 !== window.mini_map_tokens[i] && (window.mini_map_tokens[i].detach(), delete window.mini_map_tokens[i])
+ }
+
+ function e(i) {
+  return void 0 !== window.mini_map_tokens[i]
+ }
+
+ function o(i, t, n) {
+  return void 0 !== window.mini_map_tokens[i] ? (window.mini_map_tokens[i].css("left", t / 20000 * 104 + "%").css("top", n / 20000 * 104 + "%"), !0) : !1
+ }
+
+ function s(i, t) {
+  window.mini_map_pos.text()
+ }
+
+ function a() {
+  var i = window.jQuery;
+  if (window.mini_map_tokens = {}, 0 === i("#mini-map-pos").length && (window.mini_map_pos = i("<div>").attr("id", "mini-map-pos").css({
+       bottom: 10,
+       right: 10,
+       color: "white",
+       background: "rgba(155, 155, 155, 0.6)",
+       fontSize: 25,
+       fontWeight: 800,
+       position: "fixed",
+       padding: "0px 10px"
+      }).appendTo(document.body)), 0 === i("#mini-map-wrapper").length) {
+   var t = i("<div>").attr("id", "mini-map-wrapper").css({
+        position: "fixed",
+        bottom: "103px",
+        right: "10px",
+        width: "126px",
+        height: "123px",
+		display: "none",
+		background: "url('http://agario.pbxteam.ru/engine/img/mini-map.png')"
+       }),
+       n = i("<div>").attr("id", "mini-map").css({
+        width: "100%",
+        height: "100%",
+        position: "relative"
+       });
+   t.append(n).appendTo(document.body), window.mini_map = n
+  }
+ }
+
+ function r(i, t, n, e, o, s) {
+  m[i] = this, this.id = i, this.ox = this.x = t, this.oy = this.y = n, this.oSize = this.size = e, this.color = o, this.points = [], this.pointsAcc = [], this.setName(s)
+ }
+
+ function d(i, t, n) {
+  Object.defineProperty(i, n, {
+   get: function() {
+    return t[n]
+   },
+   set: function(i) {
+    t[n] = i
+   },
+   enumerable: !0,
+   configurable: !0
+  })
+ }
+
+ function p(i, t) {
+  var n = +new Date,
+      e = Math.random(),
+      o = t,
+      s = i.getUint16(o, !0);
+  o += 2;
+  for (var a = 0; s > a; ++a) {
+   var d = m[i.getUint32(o, !0)],
+       p = m[i.getUint32(o + 4, !0)],
+       o = o + 8;
+   d && p && (p.destroy(), p.ox = p.x, p.oy = p.y, p.oSize = p.size, p.nx = d.x, p.ny = d.y, p.nSize = p.size, p.updateTime = n)
+  }
+  for (a = 0;;) {
+   var c = i.getUint32(o, !0);
+   if (o += 4, 0 == c) break;
+   ++a;
+   var d = i.getInt16(o, !0),
+       o = o + 2,
+       p = i.getInt16(o, !0),
+       o = o + 2;
+   g = i.getInt16(o, !0), o += 2;
+   for (var h = i.getUint8(o++), u = i.getUint8(o++), l = i.getUint8(o++), h = (h << 16 | u << 8 | l).toString(16); 6 > h.length;) h = "0" + h;
+   var h = "#" + h,
+       w = i.getUint8(o++),
+       u = !!(1 & w),
+       l = !!(16 & w);
+   2 & w && (o += 4), 4 & w && (o += 8), 8 & w && (o += 16);
+   for (var f, w = ""; f = i.getUint16(o, !0), o += 2, 0 != f;) w += String.fromCharCode(f);
+   f = w, w = null, m.hasOwnProperty(c) ? (w = m[c], w.updatePos(), w.ox = w.x, w.oy = w.y, w.oSize = w.size, w.color = h) : (w = new r(c, d, p, g, h, f), w.pX = d, w.pY = p), w.isVirus = u, w.isAgitated = l, w.nx = d, w.ny = p, w.nSize = g, w.updateCode = e, w.updateTime = n, f && w.setName(f)
+  }
+  for (e = i.getUint32(o, !0), o += 4, a = 0; e > a; a++) c = i.getUint32(o, !0), o += 4, w = m[c], null != w && w.destroy()
+ }
+
+ function c(i) {
+  var t = 0,
+      n = new DataView(i.data);
+  switch (240 == n.getUint8(t) && (t += 5), n.getUint8(t++)) {
+   case 16:
+    p(n, t);
+    break;
+   case 20:
+    l = [];
+    break;
+   case 32:
+    var e = n.getUint32(t, !0);
+    l.push(e)
+  }
+ }
+ var h = window.WebSocket,
+     u = window.jQuery,
+     m = [],
+     l = [];
+ r.prototype = {
+  id: 0,
+  points: null,
+  pointsAcc: null,
+  name: null,
+  nameCache: null,
+  sizeCache: null,
+  x: 0,
+  y: 0,
+  size: 0,
+  ox: 0,
+  oy: 0,
+  oSize: 0,
+  nx: 0,
+  ny: 0,
+  nSize: 0,
+  updateTime: 0,
+  updateCode: 0,
+  drawTime: 0,
+  destroyed: !1,
+  isVirus: !1,
+  isAgitated: !1,
+  wasSimpleDrawing: !0,
+  destroy: function() {
+   delete m[this.id], id = l.indexOf(this.id), -1 != id && l.splice(id, 1), this.destroyed = !0, n(this.id)
+  },
+  setName: function(i) {
+   this.name = i
+  },
+  updatePos: function() {
+   -1 != l.indexOf(this.id) && (e(this.id) || t(this.id, i(this.id, this.color)), o(this.id, this.nx, this.ny), s(this.nx, this.ny))
+  }
+ }, window.WebSocket = function(i, t) {
+  void 0 === t && (t = []);
+  var n = new h(i, t);
+  d(this, n, "binaryType"), d(this, n, "bufferedAmount"), d(this, n, "extensions"), d(this, n, "protocol"), d(this, n, "readyState"), d(this, n, "url"), this.send = function(i) {
+   return n.send.call(n, i)
+  }, this.close = function(i, t) {
+   return n.close.call(n, i, t)
+  }, this.onopen = function() {}, this.onclose = function() {}, this.onerror = function() {}, this.onmessage = function() {}, n.onopen = function(i) {
+   return this.onopen.call(n, i)
+  }.bind(this), n.onmessage = function(i) {
+   return c(i), this.onmessage.call(n, i)
+  }.bind(this), n.onclose = function(i) {
+   return this.onclose.call(n, i)
+  }.bind(this), n.onerror = function(i) {
+   return this.onerror.call(n, i)
+  }.bind(this)
+ }, window.WebSocket.prototype = h, a()
+}();
+*/
