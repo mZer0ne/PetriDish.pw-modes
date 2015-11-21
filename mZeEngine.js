@@ -20,6 +20,14 @@ var chathistory = 100;
 var spectclick = false;
 var helpte = $("#chat_textbox").attr("placeholder");
 
+
+// Доп переменые нашего чата
+var viewChat = {'ru':true,'en':true,'fr':true,'chatenter':false};
+var viewMods = ['ru','en','fr','chatenter'];
+var chatMods = ['','all','team','clan'];
+var chatMode = 'all';
+var team = [];
+
 // Основное ядро
 (function(win, $) {
   var myx = 0;
@@ -151,7 +159,7 @@ var helpte = $("#chat_textbox").attr("placeholder");
         mouseY = e.clientY;
         updateMouseAim();
       }
-     	if (!isSpectating) { 
+      if (!isSpectating) { 
         if (0.8 > zoom) { zoom = 0.8; }
         if (zoom > 4 / ratio) { zoom = 4 / ratio; }
       }
@@ -172,6 +180,7 @@ var helpte = $("#chat_textbox").attr("placeholder");
     var keyQPressed = false;
     /** @type {boolean} */
     var keyWPressed = false;
+    /** @type {boolean} */
     var keyVPressed = false;
     /**
     * @param {?} e
@@ -808,16 +817,37 @@ var helpte = $("#chat_textbox").attr("placeholder");
     var deltat = nowtime - lasttime;
     var len = chatBoard.length;
     var chatnick = chatBoard[len - 1].name;
-    var stringlang;
-    stringlang = '';
+    var stringlang = '';
     var iddlina = chatnick.indexOf(")") - 1;
     var chatid = chatnick.substr(1,iddlina);
     var chatnicknoid = chatnick.substr(iddlina+2,30);
     var state;
-    var mod;
+    var mod = '';
     var verif = '';
-    mod = '';
     var escnick = htmlspecialchars(chatnicknoid);
+    
+    // Общий чат
+    var chType = 'all';
+    
+    // Клан чат
+    var  usernickname = $("#nick").val().toLowerCase().trim();
+    for(var i = 0; i < superclans.length; i++) {
+      if (superclans[i] != '') {
+        var getClan = superclans[i].length;
+        if (usernickname.substr(0,getClan) == superclans[i]) {
+          if (escnick.toLowerCase().substr(0,getClan) == superclans[i]) {
+//            console.log(escnick.toLowerCase().substr(0,getClan) + ' >> ' + usernickname.substr(0,getClan))
+            chType = 'clan';
+          }
+        }
+      }
+    }
+    // Группавой чат
+    if( 1 == 2 ) {
+      chType = 'team';
+    }
+    
+    // Старый чат
     if ((supernames.indexOf(escnick.toLowerCase()) != -1) && (escnick.toLowerCase() != 'wrong password')) {
       verif = '<span class="verified"></span>';
     }
@@ -826,22 +856,26 @@ var helpte = $("#chat_textbox").attr("placeholder");
       gamelang = 'en';
     }
     var chatenter = readCookie("chatenter");
-    if (chatenter == null) {
+    if (chatenter == null || chatenter == 'false') {
       state = ' style="display:none;" ';
+      viewChat['chatenter'] = false;
     }
     if (chatenter == 'true') {
+      viewChat['chatenter'] = true;
       state = '';
     }
-    if (chatenter == 'false') {
-      state = ' style="display:none;" ';
-    }
     var chattt = htmlspecialchars(chatBoard[len - 1].message);
+    
     if (chatBoard[len - 1].message == '***playerenter***') {
+      if(chatMode != chType){
+        state = ' style="display:none;"';
+      }
       dop = dop+20;
       if (gamelang == 'ru') { chattt = ' вошёл в игру. '; }
       if (gamelang == 'fr') { chattt = ' entre dans le chat. '; }
       if (gamelang == 'en') { chattt = ' enters the game. '; }
-      var mg = "<div " + state + " class='chatenter'>" + verif + "<small><strong onclick='mZeEngine.to(\""  + escnick + "\");' title='" + chatid + "'  style='color:" + chatBoard[len - 1].color + "'>" + escnick + ":</strong> " + chattt + "</small></div>";
+      
+      var mg = "<div class='chatenter " + chType + "'" + state + ">" + verif + "<small><strong onclick='mZeEngine.to(\""  + escnick + "\");' title='" + chatid + "'  style='color:" + chatBoard[len - 1].color + "'>" + escnick + ":</strong> " + chattt + "</small></div>";
     }
     if (chatBoard[len - 1].message != '***playerenter***') {
       chattt = makeItCultural(chattt);
@@ -849,22 +883,33 @@ var helpte = $("#chat_textbox").attr("placeholder");
       stringlang = chattt.substr(-3,3);
       state = '';
       var checkchat = readCookie("ruschat");
-      if ((checkchat == 'false') && (stringlang.substr(1,2) == 'ru') ) {
-        state = ' style="display:none;" ';
+      viewChat['ru'] = true;
+      if ((checkchat == 'false') && (stringlang.substr(1,2) == 'ru')) {
+        state = ' style="display:none;"';
+        viewChat['ru'] = false;
       }
       var checkchat1 = readCookie("engchat");
-      if ((checkchat1 == 'false') && (stringlang.substr(1,2) == 'en') ) {
-        state = ' style="display:none;" ';
+      viewChat['en'] = true;
+      if ((checkchat1 == 'false') && (stringlang.substr(1,2) == 'en')) {
+        state = ' style="display:none;"';
+        viewChat['en'] = false;
       }
       var checkchat2 = readCookie("frchat");
-      if ((checkchat2 == 'false') && (stringlang.substr(1,2) == 'fr') ) {
+      viewChat['fr'] = true;
+      if ((checkchat2 == 'false') && (stringlang.substr(1,2) == 'fr')) {
         state = ' style="display:none;" ';
+        viewChat['fr'] = false;
       }
       if (supermods.indexOf(chatnicknoid.toLowerCase()) != -1) {
         mod = "style='color:white;background-color:red;padding:0px 5px;'";
       }
+      if(chatMode != chType){
+        if(chatMode != 'all'){
+          state = ' style="display:none;"';
+        }
+      }
       var selectedRegion = socketaddr.substr(5,socketaddr.length);
-      var mg = "<div " + state + " class='" + stringlang.substr(1,2) +  "' " + mod + ">" + verif + "<strong onclick='mZeEngine.to(\""  + escnick + "\");' title='" + chatid + "' style='color:" + chatBoard[len - 1].color + "'>" + escnick + ":</strong> " + mZeEngine.addSmiles(chattt.substr(0,chattt.length-4)) + "</div>";
+      var mg = "<div class='" + stringlang.substr(1,2) +  " " + chType + "'" + state + " " + mod + ">" + verif + "<strong onclick='mZeEngine.to(\""  + escnick + "\");' title='" + chatid + "' style='color:" + chatBoard[len - 1].color + "'>" + escnick + ":</strong> " + mZeEngine.addSmiles(chattt.substr(0,chattt.length-4)) + "</div>";
     }
     $("#chatlog").append(mg);
     if (jQuery('#chatlog div').length > chathistory) {
@@ -1389,9 +1434,9 @@ var helpte = $("#chat_textbox").attr("placeholder");
       ctx.beginPath();
       for (var y = -0.5 + (-offsetX + gridOffsetX / 2) % 50; y < gridOffsetX; y += 50) {
         ctx.moveTo(y, 0);
-	      ctx.lineTo(y, gridOffsetY);
-	    }
-	    for (var y = -0.5 + (-offsetY + gridOffsetY / 2) % 50; y < gridOffsetY; y += 50) {
+        ctx.lineTo(y, gridOffsetY);
+      }
+      for (var y = -0.5 + (-offsetY + gridOffsetY / 2) % 50; y < gridOffsetY; y += 50) {
         ctx.moveTo(0, y);
         ctx.lineTo(gridOffsetX, y);
       }
@@ -1816,13 +1861,15 @@ var helpte = $("#chat_textbox").attr("placeholder");
         isDarkTheme = input;
         if(input == true) {
           $("#chat_textbox").css("color","white").css("background","rgba(255, 255, 255, 0.2) none repeat scroll 0 0");
-          $("#chatlog").removeClass("whitechat").addClass("blackchat");
-          $("#chatlog").css("color","white");
+          $("#chatlog, .chatall, .chatteam, .chatclans").removeClass("whitechat").addClass("blackchat");
+          $(".chatall, .chatteam, .chatclans").css("background","rgba(255, 255, 255, 0.2)");
+          $("#chatlog, .chatall, .chatteam, .chatclans").css("color","white");
         }
         if(input == false) {
           $("#chat_textbox").css("color","black").css("background","rgba(0, 0, 0, 0.2) none repeat scroll 0 0")
-          $("#chatlog").removeClass("blackchat").addClass("whitechat");
-          $("#chatlog").css("color","black");
+          $("#chatlog, .chatall, .chatteam, .chatclans").removeClass("blackchat").addClass("whitechat");
+          $(".chatall, .chatteam, .chatclans").css("background","rgba(0, 0, 0, 0.2)");
+          $("#chatlog, .chatall, .chatteam, .chatclans").css("color","black");
         }
       };
       /**
@@ -2305,7 +2352,7 @@ var helpte = $("#chat_textbox").attr("placeholder");
             if (0 != this.id) {
               isSimpleDrawing = ~~this.y;
               if ((isNames || isPlayer) && (this.name && (this.nameCache && (null == nameImg || -1 == qweI.indexOf(isPlayer))))) {
-				
+
                 var nameonshar = this.name;
 
                 if (-1 != qweI.indexOf(this.name.toLowerCase())) { nameonshar = ' '; }
@@ -2881,15 +2928,32 @@ var helpte = $("#chat_textbox").attr("placeholder");
 // Работаем после загрузки страницы
 window.jQuery( window ).ready(function( $ ) {
   // Наше говно)
+  $('#chatlog').remove();
+  $('body').append(
+    '<div id="chatdiv">' + 
+      '<div id="chatlog"></div>' +
+      '<div class="chatmenu">' +
+        '<div id="ch_1" onclick="mZeEngine.chatMod(1);" class="chatall" style="padding:0px;opacity:1;">Общий</div>' +
+        '<div id="ch_2" onclick="mZeEngine.chatMod(2);" class="chatteam" style="padding:0px;">Группа</div>' +
+        '<div id="ch_3" onclick="mZeEngine.chatMod(3);" class="chatclans" style="padding:0px;">Клан</div>' +
+      '</div>' +
+    '</div>'
+  );
   $('body').append(
     "<style>" +
       // Миникарта
       "#minimap-frame{z-index:-999;width:300px;height:300px;}" +
       "#minimap-div{position:relative;left:0px;top:0px;}" +
       
-      // Чат
+      // Новый Чат Улучшение
+      ".chatmenu div{text-align:center;border-radius: 10px 10px 0px 0px;width:111px;float:left;margin:0px 5px;cursor:pointer;opacity:0.2;}" +
+      ".chatmenu{position:absolute;top:-20px;left:5px;width:365px;}" +
+      "#chatdiv{position:relative;left:10px;top:0px;}" +
+      ".chatmenu div:hover{opacity:1;}" +
+      
+      // Старый чат (UPDATE)
+      "#chatlog{position:absolute;max-height:200px;min-height:200px;width:375px;left:0px;top:0px;}" +
       "#chat_textbox{border-radius: 0px 0px 10px 10px;width:375px;left:10px;}" +
-      "#chatlog{max-height:200px;width:375px;bottom:80px;left:10px;}" +
       ".blackchat, .whitechat{border-radius: 10px 10px 0px 0px;}" +
       "#chatlog div strong{cursor: pointer;}" +
     "</style>" + 
@@ -2921,7 +2985,7 @@ window.jQuery( window ).ready(function( $ ) {
           "textNode = textNode.replace(/(\\\:help\\\:|\\\*HELP\\\*)/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/help.gif\" />');" +
           "textNode = textNode.replace(/(\\\:red\\\:|\\\:\\\-\\\[)/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/red.gif\" />');" +
 //          "textNode = textNode.replace(/(\\\:rose\\\:|\\\@\\\}\\\-\\\>\\\-)/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/rose.gif\" />');" +
-          "textNode = textNode.replace(/(\\\:rose\\\:|\\\@\\\}\\\-\\\>\\\-)/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/rose.gif\" />');" +
+          "textNode = textNode.replace(/(\\\:rose\\\:)/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/rose.gif\" />');" +
           "textNode = textNode.replace(/(\\\:grust\\\:|\\\:\\\()/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/grust.gif\" />');" +
           "textNode = textNode.replace(/(\\\:tongue\\\:|\\\:\\\-p)/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/tongue.gif\" />');" +
           "textNode = textNode.replace(/(\\\:eek\\\:|\\\=\\\-O)/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/eek.gif\" />');" +
@@ -2933,13 +2997,47 @@ window.jQuery( window ).ready(function( $ ) {
           "textNode = textNode.replace(/(\\\:angel\\\:|O\\\:\\\-\\\))/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/angel.gif\" />');" +
           "textNode = textNode.replace(/(\\\:laugh\\\:|\\\:\\\-D|xD)/ig, '<img src=\"https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/smiles/laugh.gif\" />');" +
           "return textNode;" +
+        "}," +
+        "chatMod: function( id ){" + 
+          "for(var i = 1; i < 4; i++) {" +
+            "if( id != i ) {" +
+              "if(chatMods[id] == 'all') {" +
+                "for(var c = 0; c < viewMods.length; c++) {" +
+                  "if(viewChat[viewMods[c]]) {" +
+                    "$('#chatlog .' + viewMods[c]).show();" +
+                  "}" +
+                "}" +
+//                "$('#chatlog .' + chatMods[i]).show();" +
+              "} else {" +
+                "$('#chatlog .' + chatMods[i]).hide();" +
+              "}" + 
+              "$('#ch_' + i).css('opacity','');" +
+            "}" + 
+          "}" +
+          "for(var i = 0; i < viewMods.length; i++) {" +
+            "if(viewChat[viewMods[i]]) {" +
+              "$('#chatlog .' + viewMods[i] + '.' + chatMods[id]).show();" +
+            "}" +
+          "}" +
+          "$('#ch_' + id).css('opacity','1');" +
+          "$('#chatlog').scrollTop(500000);" + 
+          "chatMode = chatMods[id];" + 
         "}" +
-      "};"+
+      "};" +
+      "$(window).resize(function(){" +
+        "$('#chatdiv').css('top', ($(window).height() - 320) + 'px');" +
+      "});" +
+      "$('#chatdiv').css('top', ($(window).height() - 320) + 'px');" +
     "</script>"
   );
-
+  
+  //$('#ruschat').next('label').html('tt');
+  
   $("#setdark")
     .before('<input type="checkbox" id="setnames" onchange="createCookie(\'setratings\',!$(\'#setratings\').is(\':checked\'),999);setRatings(!$(this).is(\':checked\'));"><label> Без рейтингов</label><br/>');
+    
+//  $("#scrollchat")
+//    .before('<input type="checkbox" id="setnames" onchange="createCookie(\'setratings\',!$(\'#setratings\').is(\':checked\'),999);setRatings(!$(this).is(\':checked\'));"><label> Без рейтингов</label><br/>');
 
     
   // Всякое говно от проекта)
@@ -2949,147 +3047,163 @@ window.jQuery( window ).ready(function( $ ) {
   $("#donatewindow").remove();
   
   var ss = readCookie("simplerenderbutton");
-	if (ss == null) {
-		$("#simplerenderbutton").attr("checked","checked");
-		setSimpleMode(true);
-	}
+  if (ss == null) {
+    $("#simplerenderbutton").attr("checked","checked");
+    setSimpleMode(true);
+  }
 
-	if (ss == 'true') {
-		$("#simplerenderbutton").attr("checked","checked");
-		setSimpleMode(true);
-	}
+  if (ss == 'true') {
+    $("#simplerenderbutton").attr("checked","checked");
+    setSimpleMode(true);
+  }
 
-	if (ss == 'false') {
-		$("#simplerenderbutton").removeAttr("checked");
-		setSimpleMode(false);
-	}
-
-
-	var gridss = readCookie("hidegrid");
-	if (gridss == null) {
-		$("#hidegrid").removeAttr("checked");
-		setHideGrid(false);
-	}
-
-	if (gridss == 'true') {
-		$("#hidegrid").attr("checked","checked");
-		setHideGrid(true);
-	}
-
-	if (gridss == 'false') {
-		$("#hidegrid").removeAttr("checked");
-		setHideGrid(false);
-	}
+  if (ss == 'false') {
+    $("#simplerenderbutton").removeAttr("checked");
+    setSimpleMode(false);
+  }
 
 
-	var skinss = readCookie("setskins");
-	if (skinss == 'true') {
-		$("#setskins").removeAttr("checked");
-		setSkins(true);
-	}
+  var gridss = readCookie("hidegrid");
+  if (gridss == null) {
+    $("#hidegrid").removeAttr("checked");
+    setHideGrid(false);
+  }
 
-	if (skinss == 'false') {
-		$("#setskins").attr("checked","checked");
-		setSkins(false);
-	}
+  if (gridss == 'true') {
+    $("#hidegrid").attr("checked","checked");
+    setHideGrid(true);
+  }
 
-	var setnamess = readCookie("setnames");
-	if (setnamess == 'true') {
-		$("#setnames").removeAttr("checked");
-		setNames(true);
-	}
+  if (gridss == 'false') {
+    $("#hidegrid").removeAttr("checked");
+    setHideGrid(false);
+  }
 
-	if (setnamess == 'false') {
-		$("#setnames").attr("checked","checked");
-		setNames(false);
-	}
+  var skinss = readCookie("setskins");
+  if (skinss == 'true') {
+    $("#setskins").removeAttr("checked");
+    setSkins(true);
+  }
+
+  if (skinss == 'false') {
+    $("#setskins").attr("checked","checked");
+    setSkins(false);
+  }
+
+  var setnamess = readCookie("setnames");
+  if (setnamess == 'true') {
+    $("#setnames").removeAttr("checked");
+    setNames(true);
+  }
+
+  if (setnamess == 'false') {
+    $("#setnames").attr("checked","checked");
+    setNames(false);
+  }
   
   var setratingss = readCookie("setratings");
-	if (setratingss == 'true') {
-		$("#setratings").removeAttr("checked");
-		setRatings(true);
+  if (setratingss == 'true') {
+    $("#setratings").removeAttr("checked");
+    setRatings(true);
+  }
+
+  if (setratingss == 'false') {
+    $("#setratings").attr("checked","checked");
+    setRatings(false);
+  }
+
+  var setdarks = readCookie("setdark");
+  if (setdarks == 'true') {
+    $("#setdark").attr("checked","checked");
+    setDarkTheme(true);
+  }
+
+  if (setdarks == 'false') {
+    $("#setdark").removeAttr("checked");
+    setDarkTheme(false);
+  }
+
+  var setcolorss = readCookie("setcolors");
+  if (setcolorss == 'true') {
+    $("#setcolors").attr("checked","checked");
+    setColorsOff(true);
+  }
+
+  if (setcolorss == 'false') {
+    $("#setcolors").removeAttr("checked");
+    setColorsOff(false);
+  }
+
+  var setmasss = readCookie("setmass");
+  if (setmasss == 'true') {
+    $("#setmass").attr("checked","checked");
+    setShowMass(true);
+  }
+
+  if (setmasss == 'false') {
+    $("#setmass").removeAttr("checked");
+    setShowMass(false);
+  }
+
+  var largeborderss = readCookie("largeborders");
+  if (largeborderss == 'true') {
+    $("#largeborders").attr("checked","checked");
+    setLargeBlobBorders(true);
+  }
+
+  if (largeborderss == 'false') {
+    $("#largeborders").removeAttr("checked");
+    setLargeBlobBorders(false);
+  }
+
+  var largenamess = readCookie("largenames");
+  if (largenamess == 'true') {
+    $("#largenames").attr("checked","checked");
+    setLargeNames(true);
+  }
+
+  if (largenamess == 'false') {
+    $("#largenames").removeAttr("checked");
+    setLargeNames(false);
+  }
+
+
+  var setacids = readCookie("setacid");
+  if (setacids == 'true') {
+    $("#setacid").attr("checked","checked");
+    setAcid(true);
+  }
+
+  if (setacids == 'false') {
+    $("#setacid").removeAttr("checked");
+    setAcid(false);
+  }
+
+  var setrealtimestatss = readCookie("setrealtimestats");
+  if (setrealtimestatss == 'true') {
+    $("#setrealtimestats").attr("checked","checked");
+    OnChangeDisplayStats(true);
+  }
+
+  if (setrealtimestatss == 'false') {
+    $("#setrealtimestats").removeAttr("checked");
+    OnChangeDisplayStats(false);
+  }
+  
+  // Other
+  var scrollchats = readCookie("scrollchat");
+  if (scrollchats == null) {
+    $("#scrollchat").removeAttr("checked");
+    $("#chatlog").css("overflow-y","hidden");
+  }
+  if (scrollchats == 'true') {
+    $("#scrollchat").attr("checked","checked");
+    $("#chatlog").css("overflow-y","auto");
+  }
+
+  if (scrollchats == 'false') {
+    $("#scrollchat").removeAttr("checked");
+    $("#chatlog").css("overflow-y","hidden");
 	}
 
-	if (setratingss == 'false') {
-		$("#setratings").attr("checked","checked");
-		setRatings(false);
-	}
-
-	var setdarks = readCookie("setdark");
-	if (setdarks == 'true') {
-		$("#setdark").attr("checked","checked");
-		setDarkTheme(true);
-	}
-
-	if (setdarks == 'false') {
-		$("#setdark").removeAttr("checked");
-		setDarkTheme(false);
-	}
-
-	var setcolorss = readCookie("setcolors");
-	if (setcolorss == 'true') {
-		$("#setcolors").attr("checked","checked");
-		setColorsOff(true);
-	}
-
-	if (setcolorss == 'false') {
-		$("#setcolors").removeAttr("checked");
-		setColorsOff(false);
-	}
-
-	var setmasss = readCookie("setmass");
-	if (setmasss == 'true') {
-		$("#setmass").attr("checked","checked");
-		setShowMass(true);
-	}
-
-	if (setmasss == 'false') {
-		$("#setmass").removeAttr("checked");
-		setShowMass(false);
-	}
-
-	var largeborderss = readCookie("largeborders");
-	if (largeborderss == 'true') {
-		$("#largeborders").attr("checked","checked");
-		setLargeBlobBorders(true);
-	}
-
-	if (largeborderss == 'false') {
-		$("#largeborders").removeAttr("checked");
-		setLargeBlobBorders(false);
-	}
-
-	var largenamess = readCookie("largenames");
-	if (largenamess == 'true') {
-		$("#largenames").attr("checked","checked");
-		setLargeNames(true);
-	}
-
-	if (largenamess == 'false') {
-		$("#largenames").removeAttr("checked");
-		setLargeNames(false);
-	}
-
-
-	var setacids = readCookie("setacid");
-	if (setacids == 'true') {
-		$("#setacid").attr("checked","checked");
-		setAcid(true);
-	}
-
-	if (setacids == 'false') {
-		$("#setacid").removeAttr("checked");
-		setAcid(false);
-	}
-
-	var setrealtimestatss = readCookie("setrealtimestats");
-	if (setrealtimestatss == 'true') {
-		$("#setrealtimestats").attr("checked","checked");
-		OnChangeDisplayStats(true);
-	}
-
-	if (setrealtimestatss == 'false') {
-		$("#setrealtimestats").removeAttr("checked");
-		OnChangeDisplayStats(false);
-	}
 });
