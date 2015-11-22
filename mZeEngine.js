@@ -7122,7 +7122,8 @@ var tempVals = {};
                   /** @type {Image} */
                   images[name] = new Image;
                   /** @type {string} */
-                  images[name].src = "https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/skins/" + name + ".png";
+//                  images[name].src = "https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/skins/" + name + ".png";
+                    images[name].src = "http://petridish.pw/engine/skins2/skins/" + name + ".png";
                 }
                 if (0 != images[name].width && images[name].complete) {
                   nameImg = images[name];
@@ -7701,7 +7702,8 @@ var tempVals = {};
         var name = $("#nicks").children("option").filter(":selected").text();
         $("#nick").val(name);
         if (-1 != skins.indexOf(name)) {
-          $("#preview").attr("src", "https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/skins/default/" + name + ".png");
+//          $("#preview").attr("src", "https://cdn.rawgit.com/mZer0ne/PetriDish.pw-mods/master/assets/skins/default/" + name + ".png");
+          $("#preview").attr("src", "http://petridish.pw/engine/skins/" + name + ".png");
         }
       };
       /** @type {function (): undefined} */
