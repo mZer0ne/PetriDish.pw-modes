@@ -59,6 +59,11 @@ $.getScript( "https://cdn.socket.io/socket.io-1.3.5.js" ).done(function() {
           if (event.room_id != ''){
             map_room_id = event.room_id;
             map_party = event.party;
+            if( $('#region').val() != event.party){
+              $('#region').val(event.party);
+              connn(event.party, 'null');
+            }
+            console.log(event);
           } else {
             disconnect();
           }
@@ -339,8 +344,7 @@ $.getScript( "https://cdn.socket.io/socket.io-1.3.5.js" ).done(function() {
     }
     
     var create = function () {
-      var rand = Math.floor((Math.random() * 10000) + 1);
-      map_server.send({type: 'room_create', party: '#' + rand});
+      map_server.send({type: 'room_create', party: '#' + $('#region').val()});
     };
     
     var join = function () {
