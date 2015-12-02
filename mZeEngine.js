@@ -61,7 +61,7 @@ $.getScript( "https://cdn.socket.io/socket.io-1.3.5.js" ).done(function() {
             map_party = event.party;
             var data = map_party.split('@');
             if( $('#region').val() != data[1]){
-              showonly("'" + data[0] . "'");
+              showonly("'" + data[0] + "'");
 
               $("#region [value='" + data[1] + "']").attr("selected", "selected");
               $('#region').val(data[1]);
