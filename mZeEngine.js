@@ -60,10 +60,10 @@ $.getScript( "https://cdn.socket.io/socket.io-1.3.5.js" ).done(function() {
             map_room_id = event.room_id;
             map_party = event.party;
             if( $('#region').val() != event.party){
+              $("#region [value='" + event.party + "']").attr("selected", "selected");
               $('#region').val(event.party);
               connn(event.party, 'null');
             }
-            console.log(event);
           } else {
             disconnect();
           }
