@@ -60,9 +60,14 @@ $.getScript( "https://cdn.socket.io/socket.io-1.3.5.js" ).done(function() {
             map_room_id = event.room_id;
             map_party = event.party;
             if( $('#region').val() != event.party){
-              $("#region [value='" + event.party + "']").attr("selected", "selected");
-              $('#region').val(event.party);
-              connn(event.party, 'null');
+              var data = event.party.split(';');
+              showonly(data[0]);
+
+              $("#region [value='" + data[1] + "']").attr("selected", "selected");
+              $('#region').val(data[1]);
+              
+              connn($('#region').val(), $('#region option:selected').html());
+              
             }
           } else {
             disconnect();
@@ -344,7 +349,8 @@ $.getScript( "https://cdn.socket.io/socket.io-1.3.5.js" ).done(function() {
     }
     
     var create = function () {
-      map_server.send({type: 'room_create', party: '#' + $('#region').val()});
+      var gameMode = readCookie("selectedmode");
+      map_server.send({type: 'room_create', party: '#' + gameMode + '@' + $('#region').val()});
     };
     
     var join = function () {
