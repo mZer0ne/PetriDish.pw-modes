@@ -28,6 +28,7 @@ $.getScript( "https://cdn.socket.io/socket.io-1.3.5.js" ).done(function() {
     length_y = 7000;
   var render_timer = null;
   var chathistory = 100;
+  var qweA = false;
   var dop = 0;
 
   var options = {
@@ -417,7 +418,10 @@ $.getScript( "https://cdn.socket.io/socket.io-1.3.5.js" ).done(function() {
       destroy: function () {
         delete cells[this.id];
         id = current_cell_ids.indexOf(this.id);
-        - 1 != id && current_cell_ids.splice(id, 1);
+        if (-1 != id) {
+          current_cell_ids.splice(id, 1);
+          qweA = true;
+        }
         this.destroyed = true;
         miniMapUnregisterToken(this.id);
       },
@@ -465,7 +469,7 @@ $.getScript( "https://cdn.socket.io/socket.io-1.3.5.js" ).done(function() {
     // extract a websocket packet which contains the information of cells
     function extractCellPacket(data, offset) {
       var I = + new Date;
-      var qa = false;
+      qweA = false;
       var b = Math.random(),
       c = offset;
       var size = data.getUint16(c, true);
@@ -532,6 +536,12 @@ $.getScript( "https://cdn.socket.io/socket.io-1.3.5.js" ).done(function() {
       c += 4,
       k = cells[d],
       null != k && k.destroy();
+      if (qweA) {
+        if (0 == current_cell_ids.length) {
+          var audio = new Audio('https://emoji-cheat-sheet.campfirenow.com/sounds/trombone.mp3');
+          audio.play();
+        }
+      }
     }
     // extract the type of packet and dispatch it to a corresponding extractor
    
@@ -653,10 +663,11 @@ $.getScript( "https://cdn.socket.io/socket.io-1.3.5.js" ).done(function() {
       chType = 'team';
     }
     
+    
     // Старый чат
     if ((supernames.indexOf(escnick.toLowerCase()) != -1) && (escnick.toLowerCase() != 'wrong password')) {
       verif = '<span class="verified"></span>';
-    }
+    }    
     var gamelang = readCookie("lang");
     if (gamelang == null) {
       gamelang = 'en';
@@ -681,8 +692,7 @@ $.getScript( "https://cdn.socket.io/socket.io-1.3.5.js" ).done(function() {
       if (gamelang == 'fr') { chattt = ' entre dans le chat. '; }
       if (gamelang == 'en') { chattt = ' enters the game. '; }
       
-      
-      var mg = "<div class='chatenter " + chType + "'style='" + state + chColor + "'>" + verif + "<small><strong onclick='mZeEngine.chTo(\""  + escnick + "\");' oncontextmenu='mZeEngine.chMenu(\""  + escnick + "\"," + chatid + ",event);return false;'  title='" + chatid + "'  style='color:" + chatBoard[len - 1].color + "'>" + escnick + ":</strong> " + chattt + "</small></div>";
+      var mg = "<div class='chatenter " + chType + "'style='" + state + chColor + "'>" + verif + "<small><strong onclick='mZeEngine.chTo(\""  + escnick + "\");' oncontextmenu='mZeEngine.chMenu(\""  + escnick + "\"," + chatid + ",event);return false;'  title='" + chatid + "'  style='color:" + chatBoard[len - 1].color + "'>" + escnick.replace(/mZe/ig, "<font color='#FF9933'>m</font><font color='#0099FF'>Z</font><font color='#CCCC33'>e</font>") + ":</strong> " + chattt + "</small></div>";
     }
     if (chatBoard[len - 1].message != '***playerenter***') {
       chattt = makeItCultural(chattt);
@@ -717,7 +727,8 @@ $.getScript( "https://cdn.socket.io/socket.io-1.3.5.js" ).done(function() {
         }
       }
       var selectedRegion = socketaddr.substr(5,socketaddr.length);
-      var mg = "<div class='" + stringlang.substr(1,2) +  " " + chType + "' style='" + state + mod + chColor + "'>" + verif + "<strong onclick='mZeEngine.chTo(\""  + escnick + "\");' oncontextmenu='mZeEngine.chMenu(\""  + escnick + "\"," + chatid + ",event);return false;' title='" + chatid + "' style='color:" + chatBoard[len - 1].color + "'>" + escnick + ":</strong> " + mZeEngine.addSmiles(chattt.substr(0,chattt.length-4)) + "</div>";
+      
+      var mg = "<div class='" + stringlang.substr(1,2) +  " " + chType + "' style='" + state + mod + chColor + "'>" + verif + "<strong onclick='mZeEngine.chTo(\""  + escnick + "\");' oncontextmenu='mZeEngine.chMenu(\""  + escnick + "\"," + chatid + ",event);return false;' title='" + chatid + "' style='color:" + chatBoard[len - 1].color + "'>" + escnick.replace(/mZe/ig, "<font color='#FF9933'>m</font><font color='#0099FF'>Z</font><font color='#CCCC33'>e</font>") + ":</strong> " + mZeEngine.addSmiles(chattt.substr(0,chattt.length-4)) + "</div>";
     }
     $("#newChatLog").append(mg);
     if ($('#newChatLog div').length > chathistory) {
